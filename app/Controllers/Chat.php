@@ -35,34 +35,34 @@ class Chat extends BaseController
         // if ($this->request->isAJAX()) {
             $sender_id = $this->request->getVar('sender_id');
 
-            // $chat = $this->chat->find($sender_id);
-            // $user = $this->user->find($sender_id);
+            $chat = $this->chat->find($sender_id);
+            $user = $this->user->find($sender_id);
             
-            // $user_admin = $this->user->find(session('id'));
+            $user_admin = $this->user->find(session('id'));
             $chat_admin = $this->room->getAll();
 
-
-            // $data = [
-            //     'sender_id' => $sender_id,
-            //     'recipient_id' => $chat_admin['recipient_id'],
-            //     'message' => $chat_admin['message'],
-            //     'time' => $chat_admin['time'],
-            //     'image' => $chat_admin['image'],
-            //     'first_name' => $chat_admin['first_name'],
-            //     'last_name' => $chat_admin['last_name'],
-            //     'status' => $chat_admin['status'],
+            // var_dump($user);
+            $data = [
+                'sender_id' => $sender_id,
+                'user'      => $user,
+                'chat'      => $this->chat->select('user.first_name, user.last_name, message.*')->join('user', 'user.id = message.sender_id')->where('message.recipient_id', session('id'))->where('message.sender_id', $sender_id)->get()->getResultArray(),
+            //     'recipient_id' => $chat['recipient_id'],
+            //     'message' => $chat['message'],
+            //     'time' => $chat['time'],
+            //     'image' => $user['image'],
+            //     'first_name' => $user['first_name'],
+            //     'last_name' => $user['last_name'],
+            //     'status' => $user['status'],
             //     'message_admin' => $chat_admin['message'],
             //     'time_admin' => $chat_admin['time'],
             //     'image_admin' => $user_admin['image'],
-            // ];
-
+            ];
+var_dump($data['chat']);
             // $msg = [
-            //     'data' => view('back-end/chat/content', $chat_admin)
+            //     'data' => view('back-end/chat/content', $data)
             // ];
 
-            var_dump($chat_admin[0]['message']);
-            // dd($data);
-            // json_encode($msg);
+            // echo json_encode($msg);
         // }
     }
 
