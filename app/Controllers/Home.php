@@ -64,6 +64,7 @@ class Home extends BaseController
             'discount' => $this->discount->findAll(),
             'size' => $this->size->where('product_id', $product_id)->get()->getResultArray(),
             'color' => $this->color->where('product_id', $product_id)->get()->getResultArray(),
+            'validation' => \Config\Services::validation(),
         ];
 
         return view('front-end/product/detail', $data);
@@ -94,34 +95,69 @@ class Home extends BaseController
             return redirect()->to(site_url('masuk'));
         }
 
-        $product_id = $this->request->getVar('product_id');
-        $size = $this->request->getVar('size');
-        $color = $this->request->getVar('color');
-        $price = $this->request->getVar('price');
-        $quantity = $this->request->getVar('quantity');
-        $total = $price * $quantity;
+        $doValid = $this->validate([
+            'size' => [
+                'label' => 'Ukuran',
+                'rules' => 'required',
+                'errors' => [
+                    'required' => '{field} tidak boleh kosong',
+                ]
+            ],
+            'color' => [
+                'label' => 'Warna',
+                'rules' => 'required',
+                'errors' => [
+                    'required' => '{field} tidak boleh kosong',
+                ]
+            ],
+        ]);
 
-        $paramSession = [
-            'user_id'   => session('id'),
-            'total'     => $total,
-            'created_at' => Time::now('Asia/Jakarta', 'en_ID'),
-        ];
+        if (!$doValid) {
+            $slug = $this->request->getVar('slug');
+            $query = $this->product->getWhere(['slug' => $slug])->getRow();
 
-        $this->shopping->insert($paramSession);
+            $product_id = $query->id;
 
-        $sessionShop = $this->shopping->groupBy('id')->orderBy('id', 'DESC')->first();
+            $data = [
+                'product' => $query,
+                'brand' => $this->brand->findAll(),
+                'discount' => $this->discount->findAll(),
+                'size' => $this->size->where('product_id', $product_id)->get()->getResultArray(),
+                'color' => $this->color->where('product_id', $product_id)->get()->getResultArray(),
+                'validation' => \Config\Services::validation(),
+            ];
 
-        $paramsCart = [
-            'session_id' => $sessionShop['id'],
-            'product_id' => $product_id,
-            'size'       => $size,
-            'color'      => $color,
-            'quantity'   => $quantity,
-            'created_at' => Time::now('Asia/Jakarta', 'en_ID'),
-        ];
+            return view('front-end/product/detail', $data);
+        } else {
+            $product_id = $this->request->getVar('product_id');
+            $size = $this->request->getVar('size');
+            $color = $this->request->getVar('color');
+            $price = $this->request->getVar('price');
+            $quantity = $this->request->getVar('quantity');
+            $total = $price * $quantity;
 
-        $this->cart->insert($paramsCart);
-        return redirect()->to(site_url('keranjang'))->with('success', 'Produk berhasil ditambahkan ke keranjang!');
+            $paramSession = [
+                'user_id'   => session('id'),
+                'total'     => $total,
+                'created_at' => Time::now('Asia/Jakarta', 'en_ID'),
+            ];
+
+            $this->shopping->insert($paramSession);
+
+            $sessionShop = $this->shopping->groupBy('id')->orderBy('id', 'DESC')->first();
+
+            $paramsCart = [
+                'session_id' => $sessionShop['id'],
+                'product_id' => $product_id,
+                'size'       => $size,
+                'color'      => $color,
+                'quantity'   => $quantity,
+                'created_at' => Time::now('Asia/Jakarta', 'en_ID'),
+            ];
+
+            $this->cart->insert($paramsCart);
+            return redirect()->to(site_url('keranjang'))->with('success', 'Produk berhasil ditambahkan ke keranjang!');
+        }
     }
 
     public function cart()
@@ -241,7 +277,7 @@ class Home extends BaseController
             }
 
             $shopping = $this->cart->join('shopping_session', 'shopping_session.id = cart_item.session_id')
-                                ->where('user_id', session('id'))->get()->getResultArray();
+                ->where('user_id', session('id'))->get()->getResultArray();
             $orderParam = [];
             foreach ($shopping as $s) {
                 $orderParam[] = [

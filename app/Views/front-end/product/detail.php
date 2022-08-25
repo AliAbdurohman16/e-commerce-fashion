@@ -7,6 +7,7 @@
     <div class="container">
         <form action="<?= site_url('addCart') ?>" method="post">
             <?= csrf_field(); ?>
+            <input type="hidden" name="slug" value="<?= $product->slug ?>">
             <input type="hidden" name="product_id" value="<?= $product->id ?>">
             <div class="row">
                 <div class="col-md-6 col-lg-6 text-center mb-3">
@@ -43,8 +44,9 @@
                             </label>
                         <?php } ?>
                     </div>
+                    <small class="text-danger"><?= $validation->getError('size') ?></small>
                     <h6 class="mt-2 fw-bold">Warna</h6>
-                    <div class="selectgroup w-100 mb-3">
+                    <div class="selectgroup w-100">
                         <?php foreach ($color as $c) { ?>
                             <label class="selectgroup-item">
                                 <input type="radio" name="color" value="<?= $c['color'] ?>" class="selectgroup-input">
@@ -52,9 +54,10 @@
                             </label>
                         <?php } ?>
                     </div>
+                    <small class="text-danger"><?= $validation->getError('color') ?></small>
 
                     <div class="row">
-                        <div class="col-sm-3">
+                        <div class="col-sm-3 mt-3">
                             <?php if ($product->quantity != 0) { ?>
                                 <div class="d-flex flex-row">
                                     <button type="button" class="btn btn-link px-2 text-dark" onclick="this.parentNode.querySelector('input[type=number]').stepDown()">
@@ -81,7 +84,7 @@
                                 </div>
                             <?php } ?>
                         </div>
-                        <div class="col-sm-9">
+                        <div class="col-sm-9 mt-3">
                             <button type="submit" class="btn btn-dark">Tambah ke keranjang</button>
                         </div>
                     </div>
