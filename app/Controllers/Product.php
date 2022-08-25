@@ -92,22 +92,6 @@ class Product extends BaseController
 
         $this->product->insert($params);
 
-        $product = $this->product->groupBy('id')->orderBy('id', 'DESC')->first();
-
-
-        for ($i = 0; $i < count($size); $i++) {
-            for ($i = 0; $i < count($color); $i++) {
-                $size_params = [
-                    'product_id'    => $product['id'],
-                    'size_id'          => $size[$i],
-                    'color_id'          => $color[$i],
-                    'created_at'    => Time::now('Asia/Jakarta', 'en_ID'),
-                ];
-                $this->detail->insert($size_params);
-            }
-        }
-
-
         return redirect()->to(site_url('produk'))->with('success', 'Selamat data berhasil ditambahkan!');
     }
 
